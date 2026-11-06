@@ -7,36 +7,36 @@ export type Config = {
     currentUserName: string;
 };
 
-export function setUser(current_user_name: string): void {
-    const actual_config = readConfig();
-    actual_config.currentUserName = current_user_name;
-    writeConfig(actual_config);
+export function setUser(userName: string) {
+    const config = readConfig();
+    config.currentUserName = userName;
+    writeConfig(config);
 }
 
-function getConfigFilePath(): string {
-    return path.join(os.homedir(), "/typescript/ts-blog-aggregator/.gatorconfig.json");
-}
-
-function writeConfig(cfg: Config): void {
-    const translated_to_json = {
-        db_url: cfg.dbUrl,
-        current_user_name: cfg.currentUserName
-    }
-    fs.writeFileSync(getConfigFilePath(), JSON.stringify(translated_to_json));
-}
-
-export function readConfig(): Config {
+export function readConfig() {
     const file_content = fs.readFileSync(getConfigFilePath(), { encoding: "utf-8" });
     return validateConfig(JSON.parse(file_content));
 }
 
-function validateConfig(rawConfig: any): Config {
+function getConfigFilePath() {
+    return path.join(os.homedir(), ".gatorconfig.json");
+}
+
+function writeConfig(cfg: Config) {
+    const rawConfig = {
+        db_url: cfg.dbUrl,
+        current_user_name: cfg.currentUserName
+    }
+    fs.writeFileSync(getConfigFilePath(), JSON.stringify(rawConfig));
+}
+
+function validateConfig(rawConfig: any) {
     if (!rawConfig.db_url) {
-        throw new Error("missing db_url");
+        throw new Error("db_url is required in config file");
     }
 
     return {
         dbUrl: rawConfig.db_url,
-        currentUserName: rawConfig.current_user_name || ""
+        currentUserName: rawConfig.current_user_name ?? ""
     }
 }

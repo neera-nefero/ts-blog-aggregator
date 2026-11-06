@@ -1,10 +1,18 @@
-import { Config, readConfig, setUser } from "./config";
+import { CommandsRegistry, handlerLogin, registerCommand, runCommand } from "./command_handler";
 
 function main() {
-    setUser("Neera");
-    const config_file: Config = readConfig();
+    const commandsRegistry: CommandsRegistry = {};
+    registerCommand(commandsRegistry, "login", handlerLogin);
 
-    console.log(config_file);
+    const rawArguments = process.argv.slice(2);
+    if (rawArguments.length === 0) {
+        throw new Error("it is required arguments");
+    }
+
+    const inputCommand = rawArguments[0];
+    const inputArguments = rawArguments.slice(1);
+
+    runCommand(commandsRegistry, inputCommand, ...inputArguments);
 }
 
 main();
