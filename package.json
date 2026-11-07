@@ -5,7 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "tsx ./src/index.ts"
+    "start": "tsx ./src/index.ts",
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate"
   },
   "repository": {
     "type": "git",
@@ -20,10 +22,13 @@
   "homepage": "https://github.com/neera-nefero/ts-blog-aggregator#readme",
   "devDependencies": {
     "@types/node": "^26.6.6",
+    "drizzle-kit": "^0.31.11",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "fs": "^0.0.1-security"
+    "drizzle-orm": "^0.45.4",
+    "fs": "^0.0.1-security",
+    "postgres": "^4.1.0"
   }
 }
