@@ -12,7 +12,12 @@ export async function getUser(name: string) {
     return result;
 }
 
+export async function getUsers() {
+    const result = await db.select({ name: users.name }).from(users);
+    return result;
+}
+
 export async function resetUsers() {
-    const [result] = await db.delete(users);
+    const result = await db.delete(users);
     return result;
 }
