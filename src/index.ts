@@ -4,6 +4,7 @@ import {
     handlerRegister,
     handlerReset,
     handlerGetUsers,
+    handlerAgg,
     registerCommand,
     runCommand
 }
@@ -15,6 +16,7 @@ async function main() {
     registerCommand(commandsRegistry, "register", handlerRegister);
     registerCommand(commandsRegistry, "reset", handlerReset);
     registerCommand(commandsRegistry, "users", handlerGetUsers);
+    registerCommand(commandsRegistry, "agg", handlerAgg);
 
     const rawArguments = process.argv.slice(2);
     if (rawArguments.length === 0) {
