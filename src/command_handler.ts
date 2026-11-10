@@ -1,6 +1,6 @@
 import { setUser, readConfig } from "./config";
 import { User, createUser, getUser, resetUsers, getUsers } from "./lib/db/queries/users";
-import { Feed, addFeed } from "./lib/db/queries/feeds";
+import { Feed, addFeed, getFeeds } from "./lib/db/queries/feeds";
 import { fetchFeed } from "./feed";
 
 export type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
@@ -91,6 +91,17 @@ export async function handlerAddFeed(cmdName: string, ...args: string[]) {
     const feed = await addFeed(feedName, feedUrl, user.id);
     console.log("Feed added");
     printFeed(user, feed);
+}
+
+export async function handlerGetFeeds(cmdName: string, ...args: string[]) {
+    const feeds = await getFeeds();
+    if (!feeds) {
+        throw new Error(`there are no feeds in the table`);
+    }
+
+    for (const item of feeds) {
+        console.log(`* ${item.feeds.name} - ${item.feeds.url} - ${item.users.name}`);
+    }
 }
 
 export function registerCommand(registry: CommandsRegistry, cmdName: string, handler: CommandHandler) {
