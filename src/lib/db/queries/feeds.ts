@@ -9,8 +9,13 @@ export async function addFeed(name: string, url: string, user_id: string) {
     return result;
 }
 
+export async function getFeed(url: string) {
+    const [result] = await db.select().from(feeds).where(eq(feeds.url, url));
+    return result;
+}
+
 export async function getFeeds() {
-    const result = await db.select().from(users).innerJoin(feeds, eq(users.id, feeds.userId))
+    const result = await db.select().from(users).innerJoin(feeds, eq(users.id, feeds.userId));
     return result;
 }
 

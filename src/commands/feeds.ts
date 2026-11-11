@@ -1,7 +1,7 @@
 import { fetchFeed } from "../feed";
-import { getLogedUser } from "../config";
 
-import { Feed, addFeed, getFeeds } from "../lib/db/queries/feeds";
+import { Feed, addFeed, getFeed, getFeeds } from "../lib/db/queries/feeds";
+import { createFeedFollow, getFeedFollowsForUser } from "../lib/db/queries/feeds_follows";
 import { User, getUser } from "../lib/db/queries/users";
 
 export async function handlerAgg(cmdName: string, ...args: string[]) {
@@ -9,21 +9,17 @@ export async function handlerAgg(cmdName: string, ...args: string[]) {
     console.log(JSON.stringify(feed));
 }
 
-export async function handlerAddFeed(cmdName: string, ...args: string[]) {
+export async function handlerAddFeed(cmdName: string, user: User, ...args: string[]) {
     if (args.length <= 1) {
         throw new Error("addfeed requires name and url argument");
-    }
-
-    const logedUser = getLogedUser();
-    const user = await getUser(logedUser);
-    if (!user) {
-        throw new Error("user not registered");
     }
 
     const feedName = args[0];
     const feedUrl = args[1];
 
     const feed = await addFeed(feedName, feedUrl, user.id);
+    await createFeedFollow(user.id, feed.id);
+
     console.log("Feed added");
     printFeed(user, feed);
 }
@@ -39,19 +35,32 @@ export async function handlerGetFeeds(cmdName: string, ...args: string[]) {
     }
 }
 
-//export async function handlerFollow(cmdName: string, ...args: string[]) {
-//    if (args.length === 0) {
-//        throw new Error("follow requires a url argument");
-//    }
-//    const feedUrl = args[0];
-//
-//    const logedUser = getLogedUser();
-//
-//    await createFeedFollow()
-//    setUser(userName);
-//    console.log(`user ${userName} has been registered`);
-//    console.table(await getUser(userName));
-//}
+export async function handlerFollow(cmdName: string, user: User, ...args: string[]) {
+    if (args.length === 0) {
+        throw new Error("follow requires a url argument");
+    }
+    const feedUrl = args[0];
+
+    const feed = await getFeed(feedUrl);
+    if (!feed) {
+        throw new Error(`feed not found with the url selected`);
+    }
+
+    const feedInfo = await createFeedFollow(user.id, feed.id);
+    console.log(`Feed: ${feedInfo.feedName} - User: ${feedInfo.userName}`);
+}
+
+export async function handlerGetFeedFollowsForUser(cmdName: string, user: User, ...args: string[]) {
+    const feeds = await getFeedFollowsForUser(user.id);
+    if (feeds.length === 0) {
+        throw new Error(`there are no feeds followed by ${user.name}`);
+    }
+
+    console.log(`List of feeds followed by ${user.name}:`);
+    for (const item of feeds) {
+        console.log(`* ${item.feedName}`);
+    }
+}
 
 function printFeed(user: User, feed: Feed) {
     console.log(`user: ${user.name}`);

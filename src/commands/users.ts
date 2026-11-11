@@ -1,5 +1,5 @@
-import { setUser, getLogedUser } from "../config";
-import { createUser, getUser, resetUsers, getUsers } from "../lib/db/queries/users";
+import { setUser } from "../config";
+import { User, createUser, getUser, resetUsers, getUsers } from "../lib/db/queries/users";
 
 export async function handlerLogin(cmdName: string, ...args: string[]) {
     if (args.length === 0) {
@@ -33,19 +33,17 @@ export async function handlerRegister(cmdName: string, ...args: string[]) {
     console.table(await getUser(userName));
 }
 
-export async function handlerGetUsers(cmdName: string, ...args: string[]) {
+export async function handlerGetUsers(cmdName: string, user: User, ...args: string[]) {
     const users = await getUsers();
     if (!users) {
         throw new Error(`there are no users in the table`);
     }
 
-    const logedUser = getLogedUser();
-
-    for (const user of users) {
-        if (logedUser == user.name) {
-            console.log(`* ${user.name} (current)`);
+    for (const item of users) {
+        if (user.name == item.name) {
+            console.log(`* ${item.name} (current)`);
         } else {
-            console.log(`* ${user.name}`);
+            console.log(`* ${item.name}`);
         }
     }
 }
