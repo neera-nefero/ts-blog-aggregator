@@ -1,8 +1,8 @@
 import { fetchFeed } from "../feed";
 
 import { Feed, addFeed, getFeed, getFeeds } from "../lib/db/queries/feeds";
-import { createFeedFollow, getFeedFollowsForUser } from "../lib/db/queries/feeds_follows";
-import { User, getUser } from "../lib/db/queries/users";
+import { createFeedFollow, getFeedFollowsForUser, deleteFeedFollow } from "../lib/db/queries/feeds_follows";
+import { User } from "../lib/db/queries/users";
 
 export async function handlerAgg(cmdName: string, ...args: string[]) {
     const feed = await fetchFeed("https://www.wagslane.dev/index.xml");
@@ -52,14 +52,24 @@ export async function handlerFollow(cmdName: string, user: User, ...args: string
 
 export async function handlerGetFeedFollowsForUser(cmdName: string, user: User, ...args: string[]) {
     const feeds = await getFeedFollowsForUser(user.id);
-    if (feeds.length === 0) {
-        throw new Error(`there are no feeds followed by ${user.name}`);
-    }
 
     console.log(`List of feeds followed by ${user.name}:`);
     for (const item of feeds) {
         console.log(`* ${item.feedName}`);
     }
+}
+
+export async function handlerUnfollowFeed(cmdName: string, user: User, ...args: string[]) {
+    if (args.length === 0) {
+        throw new Error("unfollowfeed requires url argument");
+    }
+
+    const feedUrl = args[0];
+
+    const feed = await getFeed(feedUrl);
+    await deleteFeedFollow(user.id, feed.id);
+
+    console.log("Feed unfollowed");
 }
 
 function printFeed(user: User, feed: Feed) {
