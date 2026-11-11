@@ -2,8 +2,14 @@ import { db } from "..";
 import { users, feeds, feedFollows } from "../schema";
 import { eq } from 'drizzle-orm';
 
-export async function createFeedFollow(userId: string, feedId: string) {
+export async function insertFeedFollow(userId: string, feedId: string) {
     const [newFeedFollow] = await db.insert(feedFollows).values({ userId: userId, feedId: feedId }).returning();
+
+    return newFeedFollow;
+}
+
+export async function createFeedFollow(userId: string, feedId: string) {
+    const newFeedFollow = await insertFeedFollow(userId, feedId);
 
     const [result] = await db.select({
         id: feedFollows.id,

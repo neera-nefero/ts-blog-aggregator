@@ -18,6 +18,16 @@ export function readConfig() {
     return validateConfig(JSON.parse(file_content));
 }
 
+export function getLogedUser() {
+    const config = readConfig();
+    const logedUser = config.currentUserName;
+    if (!logedUser) {
+        throw new Error("user login required");
+    }
+
+    return logedUser;
+}
+
 function getConfigFilePath() {
     return path.join(os.homedir(), ".gatorconfig.json");
 }
