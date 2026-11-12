@@ -29,6 +29,13 @@
       "when": 1794480219901,
       "tag": "0003_simple_christian_walker",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794484612124,
+      "tag": "0004_shocking_amphibian",
+      "breakpoints": true
     }
   ]
 }
