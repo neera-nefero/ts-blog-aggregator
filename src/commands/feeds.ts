@@ -1,12 +1,29 @@
-import { fetchFeed } from "../feed";
-
+import { scrapeFeeds } from "../feed";
 import { Feed, addFeed, getFeed, getFeeds } from "../lib/db/queries/feeds";
 import { createFeedFollow, getFeedFollowsForUser, deleteFeedFollow } from "../lib/db/queries/feeds_follows";
 import { User } from "../lib/db/queries/users";
 
 export async function handlerAgg(cmdName: string, ...args: string[]) {
-    const feed = await fetchFeed("https://www.wagslane.dev/index.xml");
-    console.log(JSON.stringify(feed));
+    if (args.length === 0) {
+        throw new Error("agg requires a time between requests argument");
+    }
+
+    const timeBetweenRequests = parseDuration(args[0]);
+    console.log(`Collecting feeds every ${args[0]}`);
+
+    scrapeFeeds().catch(handleError);
+
+    const interval = setInterval(() => {
+        scrapeFeeds().catch(handleError);
+    }, timeBetweenRequests);
+
+    await new Promise<void>((resolve) => {
+        process.on("SIGINT", () => {
+            console.log("Shutting down feed aggregator...");
+            clearInterval(interval);
+            resolve();
+        });
+    });
 }
 
 export async function handlerAddFeed(cmdName: string, user: User, ...args: string[]) {
@@ -76,4 +93,33 @@ function printFeed(user: User, feed: Feed) {
     console.log(`user: ${user.name}`);
     console.log(`feed: ${feed.name}`);
     console.log(`url: ${feed.url}`);
+}
+
+function parseDuration(durationStr: string) {
+    const regex = /^(\d+)(ms|s|m|h)$/;
+    const match = durationStr.match(regex);
+
+    if (match === null) {
+        throw new Error("bad format for time between requests argument")
+    }
+
+    const amount = parseInt(match[1], 10);
+
+    switch (match[2]) {
+        case "ms":
+            return amount;
+        case "s":
+            return amount * 1000;
+        case "m":
+            return amount * 60 * 1000;
+        case "h":
+            return amount * 60 * 60 * 1000;
+        default:
+            throw new Error("bad format for time between requests argument");
+    }
+}
+
+function handleError(err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`Error scraping feeds: ${message}`);
 }
